@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IpAddressInfo", "IpAddressInfo\IpAddressInfo.csproj", "{C4A5B0BF-DCFD-4B9D-8E14-B3D7011CB320}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IpAddressInfo.Tests", "IpAddressInfo.Tests\IpAddressInfo.Tests.csproj", "{255BD40A-5005-4794-8136-92ACAB12C1CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C4A5B0BF-DCFD-4B9D-8E14-B3D7011CB320}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4A5B0BF-DCFD-4B9D-8E14-B3D7011CB320}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4A5B0BF-DCFD-4B9D-8E14-B3D7011CB320}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4A5B0BF-DCFD-4B9D-8E14-B3D7011CB320}.Release|Any CPU.Build.0 = Release|Any CPU
+		{255BD40A-5005-4794-8136-92ACAB12C1CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{255BD40A-5005-4794-8136-92ACAB12C1CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{255BD40A-5005-4794-8136-92ACAB12C1CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{255BD40A-5005-4794-8136-92ACAB12C1CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

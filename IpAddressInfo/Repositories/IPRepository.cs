@@ -26,7 +26,7 @@ public class IPRepository : IIPRepository
         _context.IPAddresses.Add(ipAddress);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task<List<IPAddress>> GetIPAddressesInBatchAsync(int skip, int take)
     {
         return await _context.IPAddresses

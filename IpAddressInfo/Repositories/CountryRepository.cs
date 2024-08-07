@@ -19,7 +19,7 @@ public class CountryRepository : ICountryRepository
         return await _context.Countries
             .FirstOrDefaultAsync(country => country.Name == name);
     }
-    
+
     public async Task AddCountryAsync(Country country)
     {
         _context.Countries.Add(country);

@@ -1,6 +1,7 @@
 namespace IpAddressInfo.Entities;
 
-public class IPAddress {
+public class IPAddress
+{
     public int Id { get; set; }
     public int CountryId { get; set; }
     public string IP { get; set; } = default!;

@@ -16,12 +16,10 @@ public class ReportsController : ControllerBase
     }
 
     [HttpPost("country-report")]
-    public async Task<ActionResult<IEnumerable<CountryReportDto>>> GetCountryReport([FromBody] List<string>? countryCodes = null)
+    public async Task<ActionResult<IEnumerable<CountryReportDto>>> GetCountryReport(
+        [FromBody] List<string>? countryCodes = null)
     {
-        if (countryCodes == null || countryCodes.Count == 0)
-        {
-            countryCodes = null;
-        }
+        if (countryCodes == null || countryCodes.Count == 0) countryCodes = null;
         var result = await _reportService.GetCountryReportAsync(countryCodes);
         return Ok(result);
     }

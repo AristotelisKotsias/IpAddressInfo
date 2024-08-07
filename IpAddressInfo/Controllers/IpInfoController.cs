@@ -16,7 +16,8 @@ public class IpInfoController : ControllerBase
 
 
     [HttpGet("/ipInfo/{ip}")]
-    public async Task<IActionResult> GetIpInfo(string ip) {
+    public async Task<IActionResult> GetIpInfo(string ip)
+    {
         var ipInfo = await _ipAddressService.GetIPAddressDetailsAsync(ip);
         if (ipInfo != null) return Ok(ipInfo);
         var problemDetails = new ProblemDetails
