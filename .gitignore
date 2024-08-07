@@ -10,6 +10,12 @@ obj/
 /node_modules
 /wwwroot/node_modules
 
+# Ignore the packages folder
+/packages
+
+# Ignore the user-specific solution settings file
+IpAddressInfo.sln.DotSettings.user
+
 ### Rider ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839

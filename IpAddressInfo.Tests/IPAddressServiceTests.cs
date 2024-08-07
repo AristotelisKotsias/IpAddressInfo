@@ -32,10 +32,7 @@ public class IPAddressServiceTests
             _loggerMock.Object);
     }
 
-    private MemoryCacheEntryOptions CreateCacheEntryOptions()
-    {
-        return new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(1));
-    }
+    
     
     [Fact]
     public async Task GetIPAddressDetailsAsync_WhenCacheIsHit_ShouldReturnCachedResult()
@@ -57,7 +54,7 @@ public class IPAddressServiceTests
     [Fact]
     public async Task GetIPAddressDetailsAsync_WhenCacheIsMissed_ShouldReturnDatabaseResult()
     {
-        const string ip = "44.255.255.254";
+        var ip = "44.255.255.254";
         IPAddressDto cachedIPInfo = null;
 
         object cacheEntry = cachedIPInfo;
@@ -73,12 +70,24 @@ public class IPAddressServiceTests
                 ThreeLetterCode = "GRC"
             }
         };
-        _ipRepositoryMock.Setup(repo => repo.GetIPAddressByIPAsync(ip)).ReturnsAsync(ipAddress);
+        var ipRepositoryMock = new Mock<IIPRepository>();
+        ipRepositoryMock.Setup(repo => repo.GetIPAddressByIPAsync(ip))
+            .ReturnsAsync(
+                new IPAddress
+                {
+                    IP = "44.255.255.254",
+                    Country = new Country
+                    {
+                        Name = "Greece",
+                        TwoLetterCode = "GR",
+                        ThreeLetterCode = "GRC"
+                    }
+                }
+            );
+        //_ipRepositoryMock.Setup(repo => repo.GetIPAddressByIPAsync(ip)).ReturnsAsync(ipAddress);
 
-        // Act
         var result = await _ipAddressService.GetIPAddressDetailsAsync(ip);
         
-        // Assert
         Assert.NotNull(result);
         Assert.Equal(ip, result.IP);
         Assert.Equal("Greece", result.CountryName);
@@ -91,7 +100,6 @@ public class IPAddressServiceTests
     [Fact]
     public async Task GetIPAddressDetailsAsync_WhenCacheAndDatabaseAreMissed_ShouldReturnExternalServiceResult()
     {
-        // Arrange
         const string ip = "44.255.255.254";
         IPAddressDto cachedIPInfo = null;
 
@@ -103,10 +111,8 @@ public class IPAddressServiceTests
         var rawResponse = "1;GR;GRC;Greece";
         _externalIPServiceMock.Setup(service => service.FetchIPAddressDetailsAsync(ip)).ReturnsAsync(rawResponse);
 
-        // Act
         var result = await _ipAddressService.GetIPAddressDetailsAsync(ip);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal(ip, result.IP);
         Assert.Equal("Greece", result.CountryName);

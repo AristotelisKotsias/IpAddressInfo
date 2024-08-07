@@ -31,10 +31,16 @@ public class IPAddressService : IIPAddressService
     {
         try
         {
-            if (_cache.TryGetValue(ip, out IPAddressDto? cachedIPInfo)) return cachedIPInfo;
+            if (_cache.TryGetValue(ip, out IPAddressDto? cachedIPInfo))
+            {
+                return cachedIPInfo;
+            }
 
             var ipAddressDto = await GetIPAddressFromDatabaseAsync(ip);
-            if (ipAddressDto != null) return ipAddressDto;
+            if (ipAddressDto != null)
+            {
+                return ipAddressDto;
+            }
 
             ipAddressDto = await GetIPAddressFromExternalServiceAsync(ip);
             if (ipAddressDto != null)
