@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IpAddressInfo.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("/v1/[controller]")]
 public class ReportsController : ControllerBase
 {
     private readonly IReportService _reportService;
@@ -15,7 +15,7 @@ public class ReportsController : ControllerBase
         _reportService = reportService;
     }
 
-    [HttpPost("country-report")]
+    [HttpPost]
     public async Task<ActionResult<IEnumerable<CountryReportDto>>> GetCountryReport(
         [FromBody] List<string>? countryCodes = null)
     {

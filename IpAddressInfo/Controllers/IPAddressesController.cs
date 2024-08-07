@@ -3,19 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IpAddressInfo.Controllers;
 
-[Route("api/v1/[controller]")]
 [ApiController]
-public class IpInfoController : ControllerBase
+[Route("/v1/[controller]")]
+public class IPAddressesController : ControllerBase
 {
     private readonly IIPAddressService _ipAddressService;
 
-    public IpInfoController(IIPAddressService ipAddressService)
+    public IPAddressesController(IIPAddressService ipAddressService)
     {
         _ipAddressService = ipAddressService;
     }
 
 
-    [HttpGet("/ipInfo/{ip}")]
+    [HttpGet("{ip}")]
     public async Task<IActionResult> GetIpInfo(string ip)
     {
         var ipInfo = await _ipAddressService.GetIPAddressDetailsAsync(ip);
