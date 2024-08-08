@@ -1,6 +1,6 @@
 namespace IpAddressInfo.Interfaces;
 
-public interface IExternalIPService
+public interface IExternalIpService
 {
-    Task<string?> FetchIPAddressDetailsAsync(string ip);
+    Task<string?> FetchIpAddressDetailsAsync(string ip);
 }

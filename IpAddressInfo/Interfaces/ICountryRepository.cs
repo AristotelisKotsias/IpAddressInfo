@@ -1,4 +1,8 @@
+#region
+
 using IpAddressInfo.Entities;
+
+#endregion
 
 namespace IpAddressInfo.Interfaces;
 

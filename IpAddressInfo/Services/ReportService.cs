@@ -4,25 +4,25 @@ using IpAddressInfo.Dtos;
 using IpAddressInfo.Interfaces;
 using Npgsql;
 
-namespace IpAddressInfo.Services
+namespace IpAddressInfo.Services;
+
+public class ReportService : IReportService
 {
-    public class ReportService : IReportService
+    private readonly string _connectionString;
+    private readonly ILogger<ReportService> _logger;
+
+    public ReportService(IConfiguration configuration, ILogger<ReportService> logger)
     {
-        private readonly string _connectionString;
-        private readonly ILogger<ReportService> _logger;
+        _connectionString = configuration.GetConnectionString("DefaultConnection")??throw new ArgumentNullException(nameof(configuration));
+        _logger = logger;
+    }
 
-        public ReportService(IConfiguration configuration, ILogger<ReportService> logger)
+    public async Task<IEnumerable<CountryReportDto>> GetCountryReportAsync(IEnumerable<string>? countryCodes)
+    {
+        try
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
-            _logger = logger;
-        }
-
-        public async Task<IEnumerable<CountryReportDto>> GetCountryReportAsync(IEnumerable<string>? countryCodes)
-        {
-            try
-            {
-                using IDbConnection db = new NpgsqlConnection(_connectionString);
-                var sql = @"
+            using IDbConnection db = new NpgsqlConnection(_connectionString);
+            var sql = @"
                     SELECT
                         c.""Name"" AS CountryName,
                         COUNT(ip.""Id"") AS AddressesCount,
@@ -32,21 +32,17 @@ namespace IpAddressInfo.Services
                     JOIN
                         public.""IPAddresses"" ip ON c.""Id"" = ip.""CountryId""";
 
-                if (countryCodes != null)
-                {
-                    sql += " WHERE c.\"TwoLetterCode\" = ANY(@CountryCodes)";
-                }
+            if (countryCodes != null) sql += " WHERE c.\"TwoLetterCode\" = ANY(@CountryCodes)";
 
-                sql += " GROUP BY c.\"Name\"";
+            sql += " GROUP BY c.\"Name\"";
 
-                var result = await db.QueryAsync<CountryReportDto>(sql, new { CountryCodes = countryCodes?.ToArray() });
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while generating the country report.");
-                return new List<CountryReportDto>();
-            }
+            var result = await db.QueryAsync<CountryReportDto>(sql, new { CountryCodes = countryCodes?.ToArray() });
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while generating the country report.");
+            return new List<CountryReportDto>();
         }
     }
 }

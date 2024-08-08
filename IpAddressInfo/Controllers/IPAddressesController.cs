@@ -1,15 +1,20 @@
+#region
+
 using IpAddressInfo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Net = System.Net;
+
+#endregion
 
 namespace IpAddressInfo.Controllers;
 
 [ApiController]
 [Route("/v1/[controller]")]
-public class IPAddressesController : ControllerBase
+public class IpAddressesController : ControllerBase
 {
-    private readonly IIPAddressService _ipAddressService;
+    private readonly IIpAddressService _ipAddressService;
 
-    public IPAddressesController(IIPAddressService ipAddressService)
+    public IpAddressesController(IIpAddressService ipAddressService)
     {
         _ipAddressService = ipAddressService;
     }
@@ -18,7 +23,8 @@ public class IPAddressesController : ControllerBase
     [HttpGet("{ip}")]
     public async Task<IActionResult> GetIpInfo(string ip)
     {
-        var ipInfo = await _ipAddressService.GetIPAddressDetailsAsync(ip);
+        if (!Net.IPAddress.TryParse(ip, out var parsedIp)) return BadRequest("Malformed IP");
+        var ipInfo = await _ipAddressService.GetIpAddressDetailsAsync(parsedIp.ToString());
         if (ipInfo != null) return Ok(ipInfo);
         var problemDetails = new ProblemDetails
         {

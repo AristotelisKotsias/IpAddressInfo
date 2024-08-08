@@ -1,51 +1,48 @@
+#region
+
 using IpAddressInfo.Dtos;
 using IpAddressInfo.Entities;
 using IpAddressInfo.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
+
+#endregion
 
 namespace IpAddressInfo.Services;
 
-public class IPAddressService : IIPAddressService
+public class IpAddressService : IIpAddressService
 {
-    private readonly IMemoryCache _cache;
+    private readonly ICache _cache;
     private readonly ICountryRepository _countryRepository;
-    private readonly IExternalIPService _externalIPService;
-    private readonly IIPRepository _ipRepository;
-    private readonly ILogger<IPAddressService> _logger;
+    private readonly IExternalIpService _externalIpService;
+    private readonly IIpRepository _ipRepository;
+    private readonly ILogger<IpAddressService> _logger;
 
-    public IPAddressService(
-        IIPRepository ipRepository,
-        IMemoryCache cache,
-        IExternalIPService externalIPService,
+    public IpAddressService(
+        IIpRepository ipRepository,
+        ICache cache,
+        IExternalIpService externalIpService,
         ICountryRepository countryRepository,
-        ILogger<IPAddressService> logger)
+        ILogger<IpAddressService> logger)
     {
         _ipRepository = ipRepository;
         _cache = cache;
-        _externalIPService = externalIPService;
+        _externalIpService = externalIpService;
         _countryRepository = countryRepository;
         _logger = logger;
     }
 
-    public async Task<IPAddressDto?> GetIPAddressDetailsAsync(string ip)
+    public async Task<IpAddressDto?> GetIpAddressDetailsAsync(string ip)
     {
         try
         {
-            if (_cache.TryGetValue(ip, out IPAddressDto? cachedIPInfo))
-            {
-                return cachedIPInfo;
-            }
+            if (_cache.TryGetValue(ip, out IpAddressDto? cachedIpInfo)) return cachedIpInfo;
 
-            var ipAddressDto = await GetIPAddressFromDatabaseAsync(ip);
+            var ipAddressDto = await GetIpAddressFromDatabaseAsync(ip);
+            if (ipAddressDto != null) return ipAddressDto;
+
+            ipAddressDto = await GetIpAddressFromExternalServiceAsync(ip);
             if (ipAddressDto != null)
             {
-                return ipAddressDto;
-            }
-
-            ipAddressDto = await GetIPAddressFromExternalServiceAsync(ip);
-            if (ipAddressDto != null)
-            {
-                await SaveIPAddressToDatabaseAsync(ipAddressDto);
+                await SaveIpAddressToDatabaseAsync(ipAddressDto);
                 _cache.Set(ip, ipAddressDto, TimeSpan.FromHours(1));
                 return ipAddressDto;
             }
@@ -58,12 +55,12 @@ public class IPAddressService : IIPAddressService
         return null;
     }
 
-    private async Task<IPAddressDto?> GetIPAddressFromDatabaseAsync(string ip)
+    private async Task<IpAddressDto?> GetIpAddressFromDatabaseAsync(string ip)
     {
-        var ipAddress = await _ipRepository.GetIPAddressByIPAsync(ip);
+        var ipAddress = await _ipRepository.GetIpAddressByIpAsync(ip);
         if (ipAddress != null)
         {
-            var ipAddressDto = new IPAddressDto
+            var ipAddressDto = new IpAddressDto
             {
                 IP = ipAddress.IP,
                 CountryName = ipAddress.Country.Name,
@@ -78,26 +75,24 @@ public class IPAddressService : IIPAddressService
         return null;
     }
 
-    private async Task<IPAddressDto?> GetIPAddressFromExternalServiceAsync(string ip)
+    private async Task<IpAddressDto?> GetIpAddressFromExternalServiceAsync(string ip)
     {
-        var rawResponse = await _externalIPService.FetchIPAddressDetailsAsync(ip);
-        if (rawResponse != null)
-        {
-            var parts = rawResponse.Split(';');
-            if (parts is ["1", _, _, _])
-                return new IPAddressDto
-                {
-                    IP = ip,
-                    CountryName = parts[3],
-                    TwoLetterCode = parts[1],
-                    ThreeLetterCode = parts[2]
-                };
-        }
+        var rawResponse = await _externalIpService.FetchIpAddressDetailsAsync(ip);
+        if (rawResponse == null) return null;
+        var parts = rawResponse.Split(';');
+        if (parts is ["1", _, _, _])
+            return new IpAddressDto
+            {
+                IP = ip,
+                CountryName = parts[3],
+                TwoLetterCode = parts[1],
+                ThreeLetterCode = parts[2]
+            };
 
         return null;
     }
 
-    private async Task SaveIPAddressToDatabaseAsync(IPAddressDto ipInfo)
+    private async Task SaveIpAddressToDatabaseAsync(IpAddressDto ipInfo)
     {
         var country = await _countryRepository.GetCountryByNameAsync(ipInfo.CountryName);
         if (country == null)
@@ -119,6 +114,6 @@ public class IPAddressService : IIPAddressService
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-        await _ipRepository.AddIPAddressAsync(newIpAddress);
+        await _ipRepository.AddIpAddressAsync(newIpAddress);
     }
 }

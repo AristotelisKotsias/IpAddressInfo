@@ -1,6 +1,10 @@
+#region
+
 using IpAddressInfo.Dtos;
 using IpAddressInfo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+
+#endregion
 
 namespace IpAddressInfo.Controllers;
 

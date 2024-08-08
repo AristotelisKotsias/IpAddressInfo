@@ -1,8 +1,12 @@
+#region
+
 using IpAddressInfo.Dtos;
+
+#endregion
 
 namespace IpAddressInfo.Interfaces;
 
-public interface IIPAddressService
+public interface IIpAddressService
 {
-    Task<IPAddressDto?> GetIPAddressDetailsAsync(string ip);
+    Task<IpAddressDto?> GetIpAddressDetailsAsync(string ip);
 }

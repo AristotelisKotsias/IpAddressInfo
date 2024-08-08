@@ -1,6 +1,6 @@
 namespace IpAddressInfo.Dtos;
 
-public class IPAddressDto
+public class IpAddressDto
 {
     public string IP { get; set; } = default!;
     public string CountryName { get; set; } = default!;

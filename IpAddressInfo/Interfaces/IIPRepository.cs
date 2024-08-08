@@ -1,10 +1,14 @@
+#region
+
 using IpAddressInfo.Entities;
+
+#endregion
 
 namespace IpAddressInfo.Interfaces;
 
-public interface IIPRepository
+public interface IIpRepository
 {
-    Task<IPAddress?> GetIPAddressByIPAsync(string ip);
-    Task AddIPAddressAsync(IPAddress ipAddress);
-    Task<List<IPAddress>> GetIPAddressesInBatchAsync(int skip, int take);
+    Task<IPAddress?> GetIpAddressByIpAsync(string ip);
+    Task AddIpAddressAsync(IPAddress ipAddress);
+    Task<List<IPAddress>> GetIpAddressesInBatchAsync(int skip, int take);
 }

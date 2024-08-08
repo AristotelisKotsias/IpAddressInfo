@@ -1,5 +1,9 @@
+#region
+
 using IpAddressInfo.Entities;
 using Microsoft.EntityFrameworkCore;
+
+#endregion
 
 namespace IpAddressInfo.Data;
 
@@ -18,6 +22,10 @@ public class AppDbContext : DbContext
             .HasOne(ip => ip.Country)
             .WithMany()
             .HasForeignKey(ip => ip.CountryId);
+        
+        modelBuilder.Entity<Country>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
 
         modelBuilder.Entity<Country>().HasData(
             new Country

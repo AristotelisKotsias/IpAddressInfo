@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IpAddressInfo.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -102,6 +102,12 @@ namespace IpAddressInfo.Migrations
                     { 32, 10, new DateTime(2022, 10, 12, 7, 4, 51, 323, DateTimeKind.Utc).AddTicks(3330), "50.25.55.4", new DateTime(2022, 10, 12, 7, 4, 51, 323, DateTimeKind.Utc).AddTicks(3330) },
                     { 33, 1, new DateTime(2022, 10, 12, 8, 41, 37, 310, DateTimeKind.Utc), "10.20.30.40", new DateTime(2022, 10, 12, 8, 41, 37, 310, DateTimeKind.Utc) }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Countries_Name",
+                table: "Countries",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_IPAddresses_CountryId",
