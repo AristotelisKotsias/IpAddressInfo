@@ -18,14 +18,47 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<IPAddress>()
-            .HasOne(ip => ip.Country)
-            .WithMany()
-            .HasForeignKey(ip => ip.CountryId);
+        modelBuilder.Entity<IPAddress>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.IP)
+                .IsRequired();
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired()
+                .HasColumnType("timestamptz");
+
+            entity.Property(e => e.UpdatedAt)
+                .IsRequired()
+                .HasColumnType("timestamptz");
+
+            entity.HasOne(e => e.Country)
+                .WithMany()
+                .HasForeignKey(e => e.CountryId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
         
-        modelBuilder.Entity<Country>()
-            .HasIndex(c => c.Name)
-            .IsUnique();
+        modelBuilder.Entity<Country>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Name)
+                .IsRequired();
+
+            entity.Property(e => e.TwoLetterCode)
+                .IsRequired()
+                .HasMaxLength(2);
+
+            entity.Property(e => e.ThreeLetterCode)
+                .IsRequired()
+                .HasMaxLength(3);
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired()
+                .HasColumnType("timestamptz");
+        });
+
 
         modelBuilder.Entity<Country>().HasData(
             new Country

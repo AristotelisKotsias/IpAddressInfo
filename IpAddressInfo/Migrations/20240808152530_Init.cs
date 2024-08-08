@@ -21,9 +21,9 @@ namespace IpAddressInfo.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    TwoLetterCode = table.Column<string>(type: "text", nullable: false),
-                    ThreeLetterCode = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    TwoLetterCode = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                    ThreeLetterCode = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -38,8 +38,8 @@ namespace IpAddressInfo.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CountryId = table.Column<int>(type: "integer", nullable: false),
                     IP = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -102,12 +102,6 @@ namespace IpAddressInfo.Migrations
                     { 32, 10, new DateTime(2022, 10, 12, 7, 4, 51, 323, DateTimeKind.Utc).AddTicks(3330), "50.25.55.4", new DateTime(2022, 10, 12, 7, 4, 51, 323, DateTimeKind.Utc).AddTicks(3330) },
                     { 33, 1, new DateTime(2022, 10, 12, 8, 41, 37, 310, DateTimeKind.Utc), "10.20.30.40", new DateTime(2022, 10, 12, 8, 41, 37, 310, DateTimeKind.Utc) }
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Countries_Name",
-                table: "Countries",
-                column: "Name",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_IPAddresses_CountryId",
