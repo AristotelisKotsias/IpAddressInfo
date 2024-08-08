@@ -1,8 +1,10 @@
 #region
 
+using System.Runtime.CompilerServices;
 using IpAddressInfo.Dtos;
 using IpAddressInfo.Entities;
 using IpAddressInfo.Interfaces;
+[assembly: InternalsVisibleTo("IpAddressInfo.Tests")]
 
 #endregion
 
@@ -92,7 +94,7 @@ public class IpAddressService : IIpAddressService
         return null;
     }
 
-    private async Task SaveIpAddressToDatabaseAsync(IpAddressDto ipInfo)
+    internal async Task SaveIpAddressToDatabaseAsync(IpAddressDto ipInfo)
     {
         var country = await _countryRepository.GetCountryByNameAsync(ipInfo.CountryName);
         if (country == null)

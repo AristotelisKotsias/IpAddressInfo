@@ -30,6 +30,9 @@ IpAddressInfo.sln.DotSettings.user
 # Ignore all .idea directories
 .idea/
 
+# Ignore DS store
+.DS_Store
+
 # AWS User-specific
 .idea/**/aws.xml
 
