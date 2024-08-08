@@ -61,13 +61,6 @@ public class IpUpdateService : BackgroundService
                         }
 
                         var parts = rawResponse.Split(';');
-                        if (parts is not ["1", _, _, _])
-                        {
-                            _logger.LogWarning("Invalid response format for IP: {IP}, Response: {Response}",
-                                ipAddress.IP, rawResponse);
-                            continue;
-                        }
-
                         var newCountryName = parts[3];
                         var newTwoLetterCode = parts[1];
                         var newThreeLetterCode = parts[2];

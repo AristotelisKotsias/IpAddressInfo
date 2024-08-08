@@ -80,8 +80,7 @@ public class IpAddressService : IIpAddressService
     private async Task<IpAddressDto?> GetIpAddressFromExternalServiceAsync(string ip)
     {
         var rawResponse = await _externalIpService.FetchIpAddressDetailsAsync(ip);
-        if (rawResponse == null) return null;
-        var parts = rawResponse.Split(';');
+        var parts = rawResponse?.Split(';');
         if (parts is ["1", _, _, _])
             return new IpAddressDto
             {

@@ -8,21 +8,23 @@ namespace IpAddressInfo.Services;
 
 public class ExternalIpService : IExternalIpService
 {
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ExternalIpService> _logger;
+    private readonly string? _baseUrl;
 
-    public ExternalIpService(HttpClient httpClient, ILogger<ExternalIpService> logger)
+    public ExternalIpService(ILogger<ExternalIpService> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
-        _httpClient = httpClient;
         _logger = logger;
+        _httpClientFactory = httpClientFactory;
+        _baseUrl = configuration["IpService:BaseUrl"];
     }
 
     public async Task<string?> FetchIpAddressDetailsAsync(string ip)
     {
+        var client = _httpClientFactory.CreateClient("Ip2cService");
         try
         {
-            var response = await _httpClient.GetAsync($"https://ip2c.org/{ip}");
-
+            var response = await client.GetAsync(ip);
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();

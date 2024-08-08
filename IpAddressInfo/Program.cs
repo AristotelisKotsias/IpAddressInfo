@@ -11,6 +11,12 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpClient("Ip2cService", client =>
+{
+    var baseUrl = builder.Configuration["Ip2cService:BaseUrl"];
+    if (baseUrl != null) client.BaseAddress = new Uri(baseUrl);
+});
+
 builder.Services.AddMemoryCache();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -22,7 +28,8 @@ builder.Services.AddScoped<ICache, MemoryCache>();
 builder.Services.AddScoped<ICountryRepository, CountryRepository>();
 builder.Services.AddScoped<IIpAddressService, IpAddressService>();
 builder.Services.AddScoped<IReportService, ReportService>();
-builder.Services.AddHttpClient<IExternalIpService, ExternalIpService>();
+builder.Services.AddHttpClient("Ip2cService");
+builder.Services.AddScoped<IExternalIpService, ExternalIpService>();
 builder.Services.AddHostedService<IpUpdateService>();
 
 Log.Logger = new LoggerConfiguration()
