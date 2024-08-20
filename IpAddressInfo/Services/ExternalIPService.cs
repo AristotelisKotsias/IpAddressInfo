@@ -8,11 +8,12 @@ namespace IpAddressInfo.Services;
 
 public class ExternalIpService : IExternalIpService
 {
+    private readonly string? _baseUrl;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ExternalIpService> _logger;
-    private readonly string? _baseUrl;
 
-    public ExternalIpService(ILogger<ExternalIpService> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public ExternalIpService(ILogger<ExternalIpService> logger, IHttpClientFactory httpClientFactory,
+        IConfiguration configuration)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;

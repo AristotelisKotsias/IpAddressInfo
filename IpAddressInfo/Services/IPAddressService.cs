@@ -1,9 +1,14 @@
 #region
 
+#region
+
 using System.Runtime.CompilerServices;
 using IpAddressInfo.Dtos;
 using IpAddressInfo.Entities;
 using IpAddressInfo.Interfaces;
+
+#endregion
+
 [assembly: InternalsVisibleTo("IpAddressInfo.Tests")]
 
 #endregion

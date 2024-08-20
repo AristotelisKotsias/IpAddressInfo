@@ -31,9 +31,8 @@ public class IpRepository : IIpRepository
         var existingIpAddress = await _context.IPAddresses
             .AnyAsync(ip => ip.IP == ipAddress.IP);
         if (existingIpAddress)
-        {
-            throw new DbUpdateException($"An IP address with the IP '{ipAddress.IP}' already exists.", new Exception("Unique constraint violation"));
-        }
+            throw new DbUpdateException($"An IP address with the IP '{ipAddress.IP}' already exists.",
+                new Exception("Unique constraint violation"));
         _context.IPAddresses.Add(ipAddress);
         await _context.SaveChangesAsync();
     }

@@ -1,8 +1,12 @@
+#region
+
 using System.Data;
 using Dapper;
 using IpAddressInfo.Dtos;
 using IpAddressInfo.Interfaces;
 using Npgsql;
+
+#endregion
 
 namespace IpAddressInfo.Services;
 
@@ -13,7 +17,8 @@ public class ReportService : IReportService
 
     public ReportService(IConfiguration configuration, ILogger<ReportService> logger)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection")??throw new ArgumentNullException(nameof(configuration));
+        _connectionString = configuration.GetConnectionString("DefaultConnection") ??
+                            throw new ArgumentNullException(nameof(configuration));
         _logger = logger;
     }
 

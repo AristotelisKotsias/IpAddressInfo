@@ -34,43 +34,52 @@ public class IpUpdateService : BackgroundService
         }
     }
 
-    private async Task UpdateIpAddressesAsync()
+private async Task UpdateIpAddressesAsync()
+{
+    using var scope = _serviceProvider.CreateScope();
+    var ipRepository = scope.ServiceProvider.GetRequiredService<IIpRepository>();
+    var externalIpService = scope.ServiceProvider.GetRequiredService<IExternalIpService>();
+    //var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    
+    const int batchSize = 100;
+    var skip = 0;
+    var countryCache = new Dictionary<string, Country>(); // Cache to store country data
+    
+    while (true)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var ipRepository = scope.ServiceProvider.GetRequiredService<IIpRepository>();
-        var externalIpService = scope.ServiceProvider.GetRequiredService<IExternalIpService>();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        using var newScope = _serviceProvider.CreateScope();
+        var context = newScope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        const int batchSize = 100;
-        var skip = 0;
-        while (true)
-            try
+        try
+        {
+            var ipAddresses = await ipRepository.GetIpAddressesInBatchAsync(skip, batchSize);
+            if (ipAddresses.Count == 0)
+                break;
+
+            var tasks = ipAddresses.Select(async ipAddress =>
             {
-                var ipAddresses = await ipRepository.GetIpAddressesInBatchAsync(skip, batchSize);
-                if (ipAddresses.Count == 0)
-                    break;
-
-                foreach (var ipAddress in ipAddresses)
-                    try
+                try
+                {
+                    var rawResponse = await externalIpService.FetchIpAddressDetailsAsync(ipAddress.IP);
+                    if (rawResponse == null)
                     {
-                        var rawResponse = await externalIpService.FetchIpAddressDetailsAsync(ipAddress.IP);
-                        if (rawResponse == null)
-                        {
-                            _logger.LogWarning("Failed to fetch details for IP: {IP}", ipAddress.IP);
-                            continue;
-                        }
+                        _logger.LogWarning("Failed to fetch details for IP: {IP}", ipAddress.IP);
+                        return;
+                    }
 
-                        var parts = rawResponse.Split(';');
-                        var newCountryName = parts[3];
-                        var newTwoLetterCode = parts[1];
-                        var newThreeLetterCode = parts[2];
+                    var parts = rawResponse.Split(';');
+                    var newCountryName = parts[3];
+                    var newTwoLetterCode = parts[1];
+                    var newThreeLetterCode = parts[2];
 
-                        if (ipAddress.Country.Name == newCountryName &&
-                            ipAddress.Country.TwoLetterCode == newTwoLetterCode &&
-                            ipAddress.Country.ThreeLetterCode == newThreeLetterCode)
-                            continue;
+                    if (ipAddress.Country.Name == newCountryName &&
+                        ipAddress.Country.TwoLetterCode == newTwoLetterCode &&
+                        ipAddress.Country.ThreeLetterCode == newThreeLetterCode)
+                        return;
 
-                        var country = await context.Countries.FirstOrDefaultAsync(c => c.Name == newCountryName);
+                    if (!countryCache.TryGetValue(newCountryName, out var country))
+                    {
+                        country = await context.Countries.FirstOrDefaultAsync(c => c.Name == newCountryName);
                         if (country == null)
                         {
                             country = new Country
@@ -83,28 +92,33 @@ public class IpUpdateService : BackgroundService
                             context.Countries.Add(country);
                             await context.SaveChangesAsync();
                         }
-
-                        ipAddress.CountryId = country.Id;
-                        ipAddress.UpdatedAt = DateTime.UtcNow;
-                        context.IPAddresses.Update(ipAddress);
-
-                        // Invalidate cache
-                        _cache.Remove(ipAddress.IP);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error processing IP address: {IP}", ipAddress.IP);
+                        countryCache[newCountryName] = country; // Add to cache
                     }
 
-                await context.SaveChangesAsync();
-                skip += batchSize;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating IP addresses in batch starting at skip value: {Skip}", skip);
-                break;
-            }
+                    ipAddress.CountryId = country.Id;
+                    ipAddress.UpdatedAt = DateTime.UtcNow;
+                    context.IPAddresses.Update(ipAddress);
 
-        _logger.LogInformation("IP Update Service job completed at {Time}", DateTimeOffset.Now);
+                    // Invalidate cache
+                    _cache.Remove(ipAddress.IP);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing IP address: {IP}", ipAddress.IP);
+                }
+            });
+
+            await Task.WhenAll(tasks); // Execute all tasks concurrently
+            await context.SaveChangesAsync(); // Save all changes in a single batch
+            skip += batchSize;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating IP addresses in batch starting at skip value: {Skip}", skip);
+            break;
+        }
     }
+
+    _logger.LogInformation("IP Update Service job completed at {Time}", DateTimeOffset.Now);
+}
 }

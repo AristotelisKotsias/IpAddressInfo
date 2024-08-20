@@ -38,7 +38,7 @@ public class AppDbContext : DbContext
                 .HasForeignKey(e => e.CountryId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-        
+
         modelBuilder.Entity<Country>(entity =>
         {
             entity.HasKey(e => e.Id);
