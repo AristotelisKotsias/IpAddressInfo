@@ -41,10 +41,8 @@ public class IPAddressServiceTests
         const string ip = "44.255.255.254";
         var cachedIPInfo = new IpAddressDto
             { IP = ip, CountryName = "Greece", TwoLetterCode = "GR", ThreeLetterCode = "GRC" };
-
         object cacheEntry = cachedIPInfo;
         _cacheMock.Setup(m => m.TryGetValue(ip, out cacheEntry)).Returns(true);
-
         var result = await _ipAddressService.GetIpAddressDetailsAsync(ip);
 
         Assert.NotNull(result);
@@ -88,15 +86,11 @@ public class IPAddressServiceTests
     {
         const string ip = "44.255.255.254";
         IpAddressDto cachedIPInfo = null;
-
         object cacheEntry = cachedIPInfo;
         _cacheMock.Setup(m => m.TryGetValue(ip, out cacheEntry)).Returns(false);
-
         _ipRepositoryMock.Setup(repo => repo.GetIpAddressByIpAsync(ip)).ReturnsAsync((IPAddress)null);
-
         var rawResponse = "1;GR;GRC;Greece";
         _externalIPServiceMock.Setup(service => service.FetchIpAddressDetailsAsync(ip)).ReturnsAsync(rawResponse);
-
         var result = await _ipAddressService.GetIpAddressDetailsAsync(ip);
 
         Assert.NotNull(result);
@@ -107,7 +101,7 @@ public class IPAddressServiceTests
         _ipRepositoryMock.Verify(x => x.GetIpAddressByIpAsync(ip), Times.Once);
         _externalIPServiceMock.Verify(x => x.FetchIpAddressDetailsAsync(ip), Times.Once);
     }
-    
+
     [Fact]
     public async Task GetIPAddressDetailsAsync_WhenExternalServiceFails_ShouldReturnNull()
     {
@@ -116,17 +110,15 @@ public class IPAddressServiceTests
 
         object cacheEntry = cachedIPInfo;
         _cacheMock.Setup(m => m.TryGetValue(ip, out cacheEntry)).Returns(false);
-
         _ipRepositoryMock.Setup(repo => repo.GetIpAddressByIpAsync(ip)).ReturnsAsync((IPAddress)null);
         _externalIPServiceMock.Setup(service => service.FetchIpAddressDetailsAsync(ip)).ReturnsAsync((string)null);
-
         var result = await _ipAddressService.GetIpAddressDetailsAsync(ip);
-
+        
         Assert.Null(result);
         _ipRepositoryMock.Verify(x => x.GetIpAddressByIpAsync(ip), Times.Once);
         _externalIPServiceMock.Verify(x => x.FetchIpAddressDetailsAsync(ip), Times.Once);
     }
-    
+
     [Fact]
     public async Task SaveIpAddressToDatabaseAsync_WhenCountryExists_ShouldAddIpAddress()
     {
@@ -147,17 +139,14 @@ public class IPAddressServiceTests
         };
 
         _countryRepositoryMock.Setup(repo => repo.GetCountryByNameAsync(ipInfo.CountryName)).ReturnsAsync(country);
-
         await _ipAddressService.SaveIpAddressToDatabaseAsync(ipInfo);
-
         _countryRepositoryMock.Verify(x => x.AddCountryAsync(It.IsAny<Country>()), Times.Never);
-
         _ipRepositoryMock.Verify(x => x.AddIpAddressAsync(It.Is<IPAddress>(ip =>
             ip.IP == ipInfo.IP &&
             ip.CountryId == country.Id
         )), Times.Once);
     }
-    
+
     [Fact]
     public async Task SaveIpAddressToDatabaseAsync_WhenCountryDoesNotExist_ShouldAddCountryAndIpAddress()
     {
@@ -169,7 +158,8 @@ public class IPAddressServiceTests
             ThreeLetterCode = "GRC"
         };
 
-        _countryRepositoryMock.Setup(repo => repo.GetCountryByNameAsync(ipInfo.CountryName)).ReturnsAsync((Country)null);
+        _countryRepositoryMock.Setup(repo => repo.GetCountryByNameAsync(ipInfo.CountryName))
+            .ReturnsAsync((Country)null);
 
         await _ipAddressService.SaveIpAddressToDatabaseAsync(ipInfo);
         _countryRepositoryMock.Verify(x => x.AddCountryAsync(It.IsAny<Country>()), Times.Once);

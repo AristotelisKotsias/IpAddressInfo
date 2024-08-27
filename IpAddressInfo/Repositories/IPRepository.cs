@@ -9,41 +9,38 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IpAddressInfo.Repositories;
 
-public class IpRepository : IIpRepository
+public class IpRepository(IDbContextFactory<AppDbContext> context) : IIpRepository
 {
-    private readonly AppDbContext _context;
-
-    public IpRepository(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<IPAddress?> GetIpAddressByIpAsync(string ip)
     {
-        return await _context.IPAddresses
+        await using var ctx = await context.CreateDbContextAsync();
+        return await ctx.IPAddresses
             .Include(ipAddress => ipAddress.Country)
             .FirstOrDefaultAsync(ipAddress => ipAddress.IP == ip);
     }
 
     public async Task AddIpAddressAsync(IPAddress ipAddress)
     {
-        ArgumentNullException.ThrowIfNull(ipAddress);
-        var existingIpAddress = await _context.IPAddresses
-            .AnyAsync(ip => ip.IP == ipAddress.IP);
-        if (existingIpAddress)
-            throw new DbUpdateException($"An IP address with the IP '{ipAddress.IP}' already exists.",
-                new Exception("Unique constraint violation"));
-        _context.IPAddresses.Add(ipAddress);
-        await _context.SaveChangesAsync();
+        await using var ctx = await context.CreateDbContextAsync();
+        ctx.IPAddresses.Add(ipAddress);
+        await ctx.SaveChangesAsync();
     }
 
     public async Task<List<IPAddress>> GetIpAddressesInBatchAsync(int skip, int take)
     {
-        return await _context.IPAddresses
+        await using var ctx = await context.CreateDbContextAsync();
+        return await ctx.IPAddresses
             .Include(ipAddress => ipAddress.Country)
             .OrderBy(ipAddress => ipAddress.Id)
             .Skip(skip)
             .Take(take)
             .ToListAsync();
+    }
+
+    public async Task UpdateIpAddresses(IEnumerable<IPAddress> ipAddresses)
+    {
+        await using var ctx = await context.CreateDbContextAsync();
+        ctx.UpdateRange(ipAddresses);
+        await ctx.SaveChangesAsync();
     }
 }

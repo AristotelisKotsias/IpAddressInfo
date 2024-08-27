@@ -5,6 +5,7 @@ using IpAddressInfo.Interfaces;
 using IpAddressInfo.Repositories;
 using IpAddressInfo.Services;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Serilog;
 
 #endregion
@@ -18,18 +19,19 @@ builder.Services.AddHttpClient("Ip2cService", client =>
 });
 
 builder.Services.AddMemoryCache();
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddPooledDbContextFactory<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IIpRepository, IpRepository>();
-builder.Services.AddScoped<ICache, MemoryCache>();
-builder.Services.AddScoped<ICountryRepository, CountryRepository>();
-builder.Services.AddScoped<IIpAddressService, IpAddressService>();
-builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddTransient<IIpRepository, IpRepository>();
+builder.Services.AddSingleton<ICache, MemoryCache>();
+builder.Services.AddTransient<ICountryRepository, CountryRepository>();
+builder.Services.AddTransient<IIpAddressService, IpAddressService>();
+builder.Services.AddTransient<IReportService, ReportService>();
 builder.Services.AddHttpClient("Ip2cService");
-builder.Services.AddScoped<IExternalIpService, ExternalIpService>();
+builder.Services.AddTransient<IExternalIpService, ExternalIpService>();
 builder.Services.AddHostedService<IpUpdateService>();
 
 Log.Logger = new LoggerConfiguration()

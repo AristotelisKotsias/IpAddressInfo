@@ -6,23 +6,14 @@ using IpAddressInfo.Interfaces;
 
 namespace IpAddressInfo.Services;
 
-public class ExternalIpService : IExternalIpService
+public class ExternalIpService(
+    ILogger<ExternalIpService> logger,
+    IHttpClientFactory httpClientFactory)
+    : IExternalIpService
 {
-    private readonly string? _baseUrl;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<ExternalIpService> _logger;
-
-    public ExternalIpService(ILogger<ExternalIpService> logger, IHttpClientFactory httpClientFactory,
-        IConfiguration configuration)
-    {
-        _logger = logger;
-        _httpClientFactory = httpClientFactory;
-        _baseUrl = configuration["IpService:BaseUrl"];
-    }
-
     public async Task<string?> FetchIpAddressDetailsAsync(string ip)
     {
-        var client = _httpClientFactory.CreateClient("Ip2cService");
+        var client = httpClientFactory.CreateClient("Ip2cService");
         try
         {
             var response = await client.GetAsync(ip);
@@ -34,17 +25,17 @@ public class ExternalIpService : IExternalIpService
             }
             else
             {
-                _logger.LogWarning("Failed to fetch IP address details for {IP}. Status Code: {StatusCode}", ip,
+                logger.LogWarning("Failed to fetch IP address details for {IP}. Status Code: {StatusCode}", ip,
                     response.StatusCode);
             }
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "HTTP request error while fetching IP address details for {IP}", ip);
+            logger.LogError(ex, "HTTP request error while fetching IP address details for {IP}", ip);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while fetching IP address details for {IP}", ip);
+            logger.LogError(ex, "An unexpected error occurred while fetching IP address details for {IP}", ip);
         }
 
         return null;

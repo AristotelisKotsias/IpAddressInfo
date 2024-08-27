@@ -9,30 +9,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IpAddressInfo.Repositories;
 
-public class CountryRepository : ICountryRepository
+public class CountryRepository(IDbContextFactory<AppDbContext> context) : ICountryRepository
 {
-    private readonly AppDbContext _context;
-
-    public CountryRepository(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Country?> GetCountryByNameAsync(string name)
     {
-        return await _context.Countries
-            .FirstOrDefaultAsync(country => country.Name == name);
+        await using var ctx = await context.CreateDbContextAsync();
+        return await ctx.Countries.AsNoTracking().FirstOrDefaultAsync(x => x.Name.Equals(name));
     }
 
     public async Task AddCountryAsync(Country country)
     {
-        ArgumentNullException.ThrowIfNull(country);
-        var existingCountry = await _context.Countries
-            .AnyAsync(c => c.Name == country.Name);
-        if (existingCountry)
-            throw new DbUpdateException($"A country with the name '{country.Name}' already exists.",
-                new Exception("Unique constraint violation"));
-        _context.Countries.Add(country);
-        await _context.SaveChangesAsync();
+        await using var ctx = await context.CreateDbContextAsync();
+        var x = await ctx.Countries.FirstOrDefaultAsync(x => x.Name.Equals(country.Name));
+        if (x is not null)
+        {
+            x.ThreeLetterCode = country.ThreeLetterCode;
+            x.CreatedAt = country.CreatedAt;
+            x.TwoLetterCode = country.TwoLetterCode;
+            ctx.Countries.Update(x);
+        }
+
+        x = country;
+
+        await ctx.Countries.AddAsync(x);
+        await ctx.SaveChangesAsync();
     }
 }
