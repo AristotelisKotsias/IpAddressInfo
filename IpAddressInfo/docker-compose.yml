@@ -1,0 +1,19 @@
+services:
+  webapp:
+    container_name: ipinfo-api
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5082:5082"
+    depends_on:
+      - "db"
+  db:
+    container_name: db
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pass123
+      - POSTGRES_DB=ipInfoDb

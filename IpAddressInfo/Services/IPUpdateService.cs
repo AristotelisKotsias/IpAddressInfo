@@ -18,8 +18,7 @@ public class IpUpdateService : BackgroundService
     private readonly IIpRepository _ipRepository;
     private readonly IExternalIpService _exIp;
     private readonly ICountryRepository _countryRepository;
-
-
+    
     public IpUpdateService(ILogger<IpUpdateService> logger, IMemoryCache cache, IIpRepository ipRepository,
         IExternalIpService exIp, ICountryRepository countryRepository)
     {

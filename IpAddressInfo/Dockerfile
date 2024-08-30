@@ -7,10 +7,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["IpAddressInfo/IpAddressInfo.csproj", "IpAddressInfo/"]
+COPY ["IpAddressInfo.csproj", "IpAddressInfo/"]
 RUN dotnet restore "IpAddressInfo/IpAddressInfo.csproj"
-COPY . .
 WORKDIR "/src/IpAddressInfo"
+COPY . .
 RUN dotnet build "IpAddressInfo.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
