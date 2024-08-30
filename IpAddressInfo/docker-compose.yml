@@ -5,9 +5,12 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5082:5082"
+      - "5082:8080"
     depends_on:
       - "db"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  
   db:
     container_name: db
     image: postgres
