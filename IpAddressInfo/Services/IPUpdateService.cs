@@ -1,9 +1,7 @@
 #region
 
-using IpAddressInfo.Data;
 using IpAddressInfo.Entities;
 using IpAddressInfo.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
 #endregion
@@ -13,12 +11,12 @@ namespace IpAddressInfo.Services;
 public class IpUpdateService : BackgroundService
 {
     private readonly IMemoryCache _cache;
-    private readonly TimeSpan _interval = TimeSpan.FromHours(1);
-    private readonly ILogger<IpUpdateService> _logger;
-    private readonly IIpRepository _ipRepository;
-    private readonly IExternalIpService _exIp;
     private readonly ICountryRepository _countryRepository;
-    
+    private readonly IExternalIpService _exIp;
+    private readonly TimeSpan _interval = TimeSpan.FromHours(1);
+    private readonly IIpRepository _ipRepository;
+    private readonly ILogger<IpUpdateService> _logger;
+
     public IpUpdateService(ILogger<IpUpdateService> logger, IMemoryCache cache, IIpRepository ipRepository,
         IExternalIpService exIp, ICountryRepository countryRepository)
     {
@@ -45,7 +43,6 @@ public class IpUpdateService : BackgroundService
         var skip = 0;
         var countryCache = new Dictionary<string, Country>(); // Cache to store country data
         while (true)
-        {
             try
             {
                 var ipAddresses = await _ipRepository.GetIpAddressesInBatchAsync(skip, batchSize);
@@ -74,19 +71,16 @@ public class IpUpdateService : BackgroundService
 
                         if (!countryCache.TryGetValue(newCountryName, out var country))
                         {
-                            if (country == null)
+                            country ??= new Country
                             {
-                                country = new Country
-                                {
-                                    Name = newCountryName,
-                                    TwoLetterCode = newTwoLetterCode,
-                                    ThreeLetterCode = newThreeLetterCode,
-                                    CreatedAt = DateTime.UtcNow
-                                };
-                            }
+                                Name = newCountryName,
+                                TwoLetterCode = newTwoLetterCode,
+                                ThreeLetterCode = newThreeLetterCode,
+                                CreatedAt = DateTime.UtcNow
+                            };
 
                             await _countryRepository.AddCountryAsync(country);
-                            countryCache[newCountryName] = country; 
+                            countryCache[newCountryName] = country;
                         }
 
                         ipAddress.CountryId = country.Id;
@@ -108,7 +102,6 @@ public class IpUpdateService : BackgroundService
                 _logger.LogError(ex, "Error updating IP addresses in batch starting at skip value: {Skip}", skip);
                 break;
             }
-        }
 
         _logger.LogInformation("IP Update Service job completed at {Time}", DateTimeOffset.Now);
     }

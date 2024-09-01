@@ -1,4 +1,8 @@
+#region
+
 using Microsoft.EntityFrameworkCore;
+
+#endregion
 
 namespace IpAddressInfo.Data;
 
@@ -8,7 +12,7 @@ public static class ApplicationBuilderExtensions
     {
         using var scope = app.ApplicationServices.CreateScope();
         var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
-        
+
         using var context = dbContextFactory.CreateDbContext();
         context.Database.Migrate();
     }

@@ -22,19 +22,21 @@ public class IpAddressService : IIpAddressService
     private readonly IExternalIpService _externalIpService;
     private readonly IIpRepository _ipRepository;
     private readonly ILogger<IpAddressService> _logger;
+    private readonly IRedisCacheService _redisCache;
 
     public IpAddressService(
         IIpRepository ipRepository,
         ICache cache,
         IExternalIpService externalIpService,
         ICountryRepository countryRepository,
-        ILogger<IpAddressService> logger)
+        ILogger<IpAddressService> logger, IRedisCacheService redisCache)
     {
         _ipRepository = ipRepository;
         _cache = cache;
         _externalIpService = externalIpService;
         _countryRepository = countryRepository;
         _logger = logger;
+        _redisCache = redisCache;
     }
 
     public async Task<IpAddressDto?> GetIpAddressDetailsAsync(string ip)
@@ -50,7 +52,7 @@ public class IpAddressService : IIpAddressService
             if (ipAddressDto != null)
             {
                 await SaveIpAddressToDatabaseAsync(ipAddressDto);
-                _cache.Set(ip, ipAddressDto, TimeSpan.FromHours(1));
+                await _redisCache.SetAsync(ip, ipAddressDto);
                 return ipAddressDto;
             }
         }

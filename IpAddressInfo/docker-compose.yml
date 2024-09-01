@@ -1,7 +1,17 @@
 services:
+  db:
+    container_name: ipinfo-postgres
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pass123
+      - POSTGRES_DB=ipInfoDb
+
   webapp:
     container_name: ipinfo-api
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     ports:
@@ -11,12 +21,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
   
-  db:
-    container_name: db
-    image: postgres
+  cache:
+    container_name: ipinfo-redis
+    image: redis
     ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=pass123
-      - POSTGRES_DB=ipInfoDb
+      - "6379:6379"
+
+    
+    
