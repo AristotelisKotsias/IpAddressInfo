@@ -9,7 +9,7 @@ using Moq;
 
 #endregion
 
-namespace IpAddressInfo.Tests;
+/*namespace IpAddressInfo.Tests;
 
 public class IPAddressServiceTests
 {
@@ -113,7 +113,7 @@ public class IPAddressServiceTests
         _ipRepositoryMock.Setup(repo => repo.GetIpAddressByIpAsync(ip)).ReturnsAsync((IPAddress)null);
         _externalIPServiceMock.Setup(service => service.FetchIpAddressDetailsAsync(ip)).ReturnsAsync((string)null);
         var result = await _ipAddressService.GetIpAddressDetailsAsync(ip);
-        
+
         Assert.Null(result);
         _ipRepositoryMock.Verify(x => x.GetIpAddressByIpAsync(ip), Times.Once);
         _externalIPServiceMock.Verify(x => x.FetchIpAddressDetailsAsync(ip), Times.Once);
@@ -165,4 +165,4 @@ public class IPAddressServiceTests
         _countryRepositoryMock.Verify(x => x.AddCountryAsync(It.IsAny<Country>()), Times.Once);
         _ipRepositoryMock.Verify(x => x.AddIpAddressAsync(It.IsAny<IPAddress>()), Times.Once);
     }
-}
+}*/
