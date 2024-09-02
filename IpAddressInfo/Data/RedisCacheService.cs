@@ -1,34 +1,48 @@
-using System.Text;
+#region
+
 using System.Text.Json;
 using IpAddressInfo.Dtos;
 using IpAddressInfo.Interfaces;
 using StackExchange.Redis;
 
+#endregion
+
 namespace IpAddressInfo.Data;
 
-public class RedisCacheService(IConnectionMultiplexer connectionMultiplexer, ILogger<RedisCacheService> logger) : IRedisCacheService
+public class RedisCacheService : IRedisCacheService
 {
-    
-    public async Task SetAsync(string key, IpAddressDto? ipAddressDto)
+    private readonly IDatabase _db;
+    private readonly ILogger<RedisCacheService> _logger;
+
+    public RedisCacheService(IConnectionMultiplexer connectionMultiplexer, ILogger<RedisCacheService> logger)
+    {
+        _logger = logger;
+        _db = connectionMultiplexer.GetDatabase();
+    }
+
+    public async Task SetAsync(string key, IpAddressDto? ipAddressDto, TimeSpan? expiry = null)
     {
         var jsonData = JsonSerializer.Serialize(ipAddressDto);
-        var db = connectionMultiplexer.GetDatabase();
-        await db.StringSetAsync(key, jsonData, TimeSpan.FromMinutes(5));
-        logger.LogInformation($"Cache set for key: {key}");
+        await _db.StringSetAsync(key, jsonData, expiry);
+        _logger.LogInformation($"Cache set for key: {key}");
     }
-    
+
     public async Task<IpAddressDto?> GetAsync(string key)
     {
-        var db = connectionMultiplexer.GetDatabase();
-        var jsonData = await db.StringGetAsync(key);
+        var jsonData = await _db.StringGetAsync(key);
         if (jsonData.IsNullOrEmpty)
         {
-            logger.LogInformation($"Cache miss for key: {key}");
+            _logger.LogInformation($"Cache miss for key: {key}");
             return null;
         }
 
-        logger.LogInformation($"Cache hit for key: {key}");
-        return JsonSerializer.Deserialize<IpAddressDto>(jsonData);
+        _logger.LogInformation($"Cache hit for key: {key}");
+        return JsonSerializer.Deserialize<IpAddressDto>(jsonData!);
     }
 
+    public async Task DeleteAsync(string key)
+    {
+        await _db.KeyDeleteAsync(key);
+        _logger.LogInformation($"Entry removed: {key}");
+    }
 }

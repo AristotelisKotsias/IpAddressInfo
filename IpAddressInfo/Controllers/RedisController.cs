@@ -1,14 +1,17 @@
-using System.Text;
+#region
+
 using IpAddressInfo.Dtos;
 using IpAddressInfo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+
+#endregion
 
 [ApiController]
 [Route("[controller]")]
 public class RedisController : ControllerBase
 {
-    private readonly ILogger<RedisController> _logger;
     private readonly IRedisCacheService _cache;
+    private readonly ILogger<RedisController> _logger;
 
     public RedisController(ILogger<RedisController> logger, IRedisCacheService cache)
     {

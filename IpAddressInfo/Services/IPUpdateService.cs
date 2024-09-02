@@ -10,21 +10,21 @@ namespace IpAddressInfo.Services;
 
 public class IpUpdateService : BackgroundService
 {
-    private readonly IMemoryCache _cache;
+    private readonly IRedisCacheService _redisCache;
     private readonly ICountryRepository _countryRepository;
     private readonly IExternalIpService _exIp;
     private readonly TimeSpan _interval = TimeSpan.FromHours(1);
     private readonly IIpRepository _ipRepository;
     private readonly ILogger<IpUpdateService> _logger;
 
-    public IpUpdateService(ILogger<IpUpdateService> logger, IMemoryCache cache, IIpRepository ipRepository,
-        IExternalIpService exIp, ICountryRepository countryRepository)
+    public IpUpdateService(ILogger<IpUpdateService> logger, IIpRepository ipRepository,
+        IExternalIpService exIp, ICountryRepository countryRepository, IRedisCacheService redisCache)
     {
         _logger = logger;
-        _cache = cache;
         _ipRepository = ipRepository;
         _exIp = exIp;
         _countryRepository = countryRepository;
+        _redisCache = redisCache;
     }
 
     protected override async Task ExecuteAsync(CancellationToken ct)
@@ -85,7 +85,7 @@ public class IpUpdateService : BackgroundService
 
                         ipAddress.CountryId = country.Id;
                         ipAddress.UpdatedAt = DateTime.UtcNow;
-                        _cache.Remove(ipAddress.IP);
+                        await _redisCache.DeleteAsync(ipAddress.IP);
                     }
                     catch (Exception ex)
                     {
